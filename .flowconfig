@@ -1,0 +1,13 @@
+[ignore]
+.*/node_modules/.*
+.*/public/.*
+
+[include]
+
+[libs]
+flow-typed/npm
+./flow-typed/global.js
+
+[options]
+module.name_mapper='.*\(.css\)' -> 'CSSModule'
+module.system=haste

@@ -1,10 +1,24 @@
+/**
+ * @flow
+ */
+
 import React from 'react'
 import axios from 'axios'
 import 'react-select/dist/react-select.css';
 import Select from 'react-select'
 import { Button } from 'react-bootstrap'
 
+type Option = {
+  value : string,
+  label : string
+}
+
 export default class Browser extends React.Component{
+  state : {
+    defs : Array<Option>,
+    selected : ?Option
+  }
+
   constructor(){
     super();
     this.state = {
@@ -34,7 +48,7 @@ export default class Browser extends React.Component{
             <Select
               value={this.state.selected}
               options={this.state.defs}
-              onChange={option => this.setState({...this.state, selected : option})}
+              onChange={(option : Option) => this.setState({...this.state, selected : option})}
             />
           </div>
           <div  style={{display : 'flex', justifyContent : 'center', marginTop : 20}}>
