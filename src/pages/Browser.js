@@ -3,25 +3,24 @@
  */
 
 import 'highlight.js/styles/vs.css'
+import 'react-select/dist/react-select.css';
 import React from 'react'
 import axios from 'axios'
-import 'react-select/dist/react-select.css';
 import Select from 'react-select'
-import { Button } from 'react-bootstrap'
 import Highlight from 'react-highlight';
 import type { GHResponse } from '../types/Github'
 
 type Option = {
   value : string,
   label : string,
-  obj : GHResponse
+  obj : GHResponse,
 }
 
 export default class Browser extends React.Component{
   state : {
     defs : Array<Option>,
     selected : Array<Option>,
-    code : ?GHResponse
+    code : ?GHResponse,
   }
 
   constructor(){
@@ -29,7 +28,7 @@ export default class Browser extends React.Component{
     this.state = {
       defs : [],
       selected : [],
-      code : null
+      code : null,
     }
   }
 
@@ -41,11 +40,11 @@ export default class Browser extends React.Component{
           ...this.state, 
           defs : this.state.defs.concat([newDefs])
         })
-      })
+      });
   }
 
   componentWillMount(){
-    this.fetchOptions('https://api.github.com/repos/flowtype/flow-typed/contents/definitions/npm')
+    this.fetchOptions('https://api.github.com/repos/flowtype/flow-typed/contents/definitions/npm');
   }
 
   select = (i : number) => (option : Option) => {
@@ -54,13 +53,13 @@ export default class Browser extends React.Component{
       selected : this.state.selected.slice(0, i).concat([option]),
       defs : this.state.defs.slice(0, i+1),
       code : null,
-    })
+    });
 
     if(option && option.obj.type === 'file'){
       axios.get(option.obj.url)
         .then(({data}) => {
           this.setState({...this.state, code : data})
-        })
+        });
     }else if(option && option.obj.type === 'dir'){
       this.fetchOptions(option.obj.url);
     }
@@ -114,4 +113,4 @@ const styles = {
     justifyContent : 'center',
     alignItems : 'center'
   }
-}
+};
