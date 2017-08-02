@@ -2,36 +2,68 @@
  * @flow
  */
 
+import 'highlight.js/styles/vs.css'
 import React from 'react'
 import axios from 'axios'
 import 'react-select/dist/react-select.css';
 import Select from 'react-select'
 import { Button } from 'react-bootstrap'
+import Highlight from 'react-highlight';
+import type { GHResponse } from '../types/Github'
 
 type Option = {
   value : string,
-  label : string
+  label : string,
+  obj : GHResponse
 }
 
 export default class Browser extends React.Component{
   state : {
     defs : Array<Option>,
-    selected : ?Option
+    selected : Array<Option>,
+    code : ?GHResponse
   }
 
   constructor(){
     super();
     this.state = {
       defs : [],
-      selected : null
+      selected : [],
+      code : null
     }
   }
 
-  componentWillMount(){
-    axios.get('/defs')
+  fetchOptions(url : string){
+    axios.get(url)
       .then(({data}) => {
-        this.setState({...this.state, defs : data.map(f => ({value : f, label : f}))})
+        const newDefs = data.map(f => ({value : f.name, label : f.name, obj : f}));
+        this.setState({
+          ...this.state, 
+          defs : this.state.defs.concat([newDefs])
+        })
       })
+  }
+
+  componentWillMount(){
+    this.fetchOptions('https://api.github.com/repos/flowtype/flow-typed/contents/definitions/npm')
+  }
+
+  select = (i : number) => (option : Option) => {
+    this.setState({ 
+      ...this.state, 
+      selected : this.state.selected.slice(0, i).concat([option]),
+      defs : this.state.defs.slice(0, i+1),
+      code : null,
+    })
+
+    if(option && option.obj.type === 'file'){
+      axios.get(option.obj.url)
+        .then(({data}) => {
+          this.setState({...this.state, code : data})
+        })
+    }else if(option && option.obj.type === 'dir'){
+      this.fetchOptions(option.obj.url);
+    }
   }
 
   render(){
@@ -44,25 +76,36 @@ export default class Browser extends React.Component{
         </div>
         <div style={{width : '100%', marginTop : 30}}>
           <h3 className='text-center'>Select Project</h3>
-          <div  style={{margin : '0 auto', width : '70%'}}>
-            <Select
-              value={this.state.selected}
-              options={this.state.defs}
-              onChange={(option : Option) => this.setState({...this.state, selected : option})}
-            />
-          </div>
-          <div  style={{display : 'flex', justifyContent : 'center', marginTop : 20}}>
-            <Button bsStyle='primary' disabled={this.state.selected == null}>
-              View Defs
-            </Button>
-          </div>
+          {
+            this.state.defs.map((defs, i) => 
+              <div key={i} style={{margin : '0 auto', width : '70%', marginTop : 10}}>
+                <Select
+                  value={this.state.selected[i]}
+                  options={defs}
+                  onChange={this.select(i)}
+                />
+              </div>
+            )
+          }
         </div>
+        {
+          this.state.code ? 
+            <div className='col-xs-10 col-xs-offset-1' style={styles.codeContainer}>
+              <Highlight className='javascript'>
+                {atob(this.state.code.content)}
+              </Highlight>
+            </div> : null
+        }
       </div>
     )
   }
 }
 
 const styles = {
+  codeContainer : {
+    marginTop : 20,
+    overflowY : 'scroll'
+  },
   container : {
     height : 150, 
     backgroundColor : 'black', 
