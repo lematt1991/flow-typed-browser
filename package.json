@@ -1,10 +1,10 @@
 {
   "name": "flow-typed-browser",
   "version": "0.1.0",
-  "private": true,
   "dependencies": {
     "axios": "^0.16.2",
     "flow-bin": "^0.51.1",
+    "gh-pages": "^1.0.0",
     "react": "^15.6.1",
     "react-bootstrap": "^0.31.1",
     "react-dom": "^15.6.1",
@@ -21,6 +21,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "flow": "flow"
-  }
+    "flow": "flow",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "homepage": "https://ml9951.github.io/flow-typed-browser"
 }
